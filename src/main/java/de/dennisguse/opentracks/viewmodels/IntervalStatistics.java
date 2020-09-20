@@ -22,6 +22,7 @@ public class IntervalStatistics {
         }
 
         Interval interval = new Interval();
+        interval.gain_m += trackPointList.get(0).getElevationGain();
         for (int i = 1; i < trackPointList.size(); i++) {
             TrackPoint prevTrackPoint = trackPointList.get(i - 1);
             TrackPoint trackPoint = trackPointList.get(i);
