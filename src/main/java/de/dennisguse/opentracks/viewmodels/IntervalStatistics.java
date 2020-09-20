@@ -29,6 +29,7 @@ public class IntervalStatistics {
             if (LocationUtils.isValidLocation(trackPoint.getLocation()) && LocationUtils.isValidLocation(prevTrackPoint.getLocation())) {
                 interval.distance_m += prevTrackPoint.distanceTo(trackPoint);
                 interval.time_ms += trackPoint.getTime() - prevTrackPoint.getTime();
+                interval.gain_m += trackPoint.getElevationGain();
 
                 if (interval.distance_m >= distanceInterval_m) {
                     float adjustFactor = distanceInterval_m / interval.distance_m;
@@ -54,17 +55,20 @@ public class IntervalStatistics {
     public static class Interval {
         private float distance_m = 0f;
         private float time_ms = 0f;
+        private float gain_m = 0f;
 
         public Interval() {}
 
         public Interval(float distance_m, float time_ms) {
             this.distance_m = distance_m;
             this.time_ms = time_ms;
+            this.gain_m = 0f;
         }
 
         public Interval(Interval i) {
             distance_m = i.distance_m;
             time_ms = i.time_ms;
+            gain_m = i.gain_m;
         }
 
         public float getDistance_m() {
@@ -84,6 +88,10 @@ public class IntervalStatistics {
                 return 0f;
             }
             return distance_m / (float) (time_ms * UnitConversions.MS_TO_S);
+        }
+
+        public float getGain_m() {
+            return gain_m;
         }
     }
 }
