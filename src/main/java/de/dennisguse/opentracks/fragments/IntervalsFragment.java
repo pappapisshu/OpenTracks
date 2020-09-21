@@ -86,14 +86,10 @@ public class IntervalsFragment extends Fragment {
         intervalUnit = PreferencesUtils.isMetricUnits(getContext()) ? getContext().getString(R.string.unit_kilometer) : getContext().getString(R.string.unit_mile);
 
         if (savedInstanceState != null) {
-            trackId = savedInstanceState.getParcelable(TRACK_ID_KEY);
+            setTrackId(savedInstanceState.getParcelable(TRACK_ID_KEY));
         } else {
-            trackId = getArguments().getParcelable(TRACK_ID_KEY);
+            setTrackId(getArguments().getParcelable(TRACK_ID_KEY));
         }
-
-        ContentProviderUtils contentProviderUtils = new ContentProviderUtils(getContext());
-        Track track = contentProviderUtils.getTrack(trackId);
-        category = track.getCategory();
 
         rateLabel = view.findViewById(R.id.interval_rate);
 
@@ -159,6 +155,12 @@ public class IntervalsFragment extends Fragment {
         outState.putParcelable(TRACK_ID_KEY, trackId);
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        setTrackId(trackId);
+    }
+
     /**
      * Update intervals through {@link IntervalStatisticsModel} view model.
      */
@@ -178,14 +180,29 @@ public class IntervalsFragment extends Fragment {
 
     public void setTrackId(Track.Id trackId) {
         this.trackId = trackId;
+        if (this.trackId != null) {
+            ContentProviderUtils contentProviderUtils = new ContentProviderUtils(getContext());
+            Track track = contentProviderUtils.getTrack(this.trackId);
+            setCategory(track.getCategory());
+        }
+    }
+
+    public void setCategory(String category) {
+        if (this.category == null || !this.category.equals(category)) {
+            this.category = category;
+            setRateLabel();
+            intervalChanged();
+        }
     }
 
     private void setRateLabel() {
-        boolean reportSpeed = PreferencesUtils.isReportSpeed(getContext(), category);
-        rateLabel.setText(reportSpeed ? R.string.stats_speed : R.string.stats_pace);
+        if (rateLabel != null) {
+            boolean reportSpeed = PreferencesUtils.isReportSpeed(getContext(), category);
+            rateLabel.setText(reportSpeed ? R.string.stats_speed : R.string.stats_pace);
+        }
     }
 
-    public static class IntervalsRecordingFragment extends IntervalsFragment implements TrackRecordingActivity.OnTrackIdListener {
+    public static class IntervalsRecordingFragment extends IntervalsFragment implements TrackRecordingActivity.OnTrackRecordingListener {
         // Refreshing intervals stats it's not so demanding so 5 seconds is enough to balance performance and user experience.
         private static final long UI_UPDATE_INTERVAL = 5 * UnitConversions.ONE_SECOND_MS;
 
@@ -237,6 +254,11 @@ public class IntervalsFragment extends Fragment {
         @Override
         public void onTrackId(Track.Id trackId) {
             setTrackId(trackId);
+        }
+
+        @Override
+        public void onCategoryChanged(String category) {
+            setCategory(category);
         }
     }
 }

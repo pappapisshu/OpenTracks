@@ -22,7 +22,7 @@ public class IntervalStatistics {
         }
 
         Interval interval = new Interval();
-        interval.gain_m += trackPointList.get(0).getElevationGain();
+        interval.gain_m += trackPointList.get(0).hasElevationGain() ? trackPointList.get(0).getElevationGain() : 0;
         for (int i = 1; i < trackPointList.size(); i++) {
             TrackPoint prevTrackPoint = trackPointList.get(i - 1);
             TrackPoint trackPoint = trackPointList.get(i);
@@ -30,7 +30,7 @@ public class IntervalStatistics {
             if (LocationUtils.isValidLocation(trackPoint.getLocation()) && LocationUtils.isValidLocation(prevTrackPoint.getLocation())) {
                 interval.distance_m += prevTrackPoint.distanceTo(trackPoint);
                 interval.time_ms += trackPoint.getTime() - prevTrackPoint.getTime();
-                interval.gain_m += trackPoint.getElevationGain();
+                interval.gain_m += trackPoint.hasElevationGain() ? trackPoint.getElevationGain() : 0;
 
                 if (interval.distance_m >= distanceInterval_m) {
                     float adjustFactor = distanceInterval_m / interval.distance_m;
